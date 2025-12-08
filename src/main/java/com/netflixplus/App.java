@@ -17,7 +17,9 @@ public class App {
 
         ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         handler.setContextPath("/");
-        ServletHolder servlet = handler.addServlet(ServletContainer.class, "/*");
+
+        ServletHolder servlet = new ServletHolder(new ServletContainer(config));
+        handler.addServlet(servlet, "/*");
         servlet.setInitParameter(
                 "jersey.config.server.provider.packages",
                 "com.netflixplus.api"
