@@ -1,5 +1,6 @@
 package com.netflixplus;
 
+import com.netflixplus.db.DB;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -10,6 +11,7 @@ public class App {
         Server server = new Server(8080);
         ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         handler.setContextPath("/");
+        //DB.openConnection();
 
         ServletHolder servlet = handler.addServlet(ServletContainer.class, "/*");
         servlet.setInitParameter(
