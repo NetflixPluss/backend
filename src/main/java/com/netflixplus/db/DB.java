@@ -17,7 +17,7 @@ public class DB {
     public static Connection openConnection() {
         System.out.println("Connecting to " + url);
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Class.forName("org.mariadb.jdbc.Driver");
             con = DriverManager.getConnection(url, user, password);
             return con;
         } catch (ClassNotFoundException | SQLException e) {
