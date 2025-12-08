@@ -23,10 +23,14 @@ public class DB {
     }
 
     public static Connection getConnection() {
-        if (con == null)
-            return openConnection();
-        else
-            return con;
+        try {
+            if (con == null || con.isClosed()) {
+                con = openConnection();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return con;
     }
 
     public static void closeConnection(Connection con) {
