@@ -15,7 +15,6 @@ public class DB {
     private static final String password = dotenv.get("DB_PASS");
 
     public static Connection openConnection() {
-        System.out.println("Connecting to " + url);
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             con = DriverManager.getConnection(url, user, password);
@@ -27,6 +26,7 @@ public class DB {
 
     public static Connection getConnection() {
         try {
+            System.out.println("getConnection " + url);
             if (con == null || con.isClosed()) {
                 con = openConnection();
             }
@@ -36,7 +36,7 @@ public class DB {
         return con;
     }
 
-    public static void closeConnection(Connection con) {
+    public static void closeConnection() {
         try {
             if (con != null && !con.isClosed())
                 con.close();

@@ -67,7 +67,8 @@ public class AuthenticationResource {
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
-                if (storedHash.equals(User.hashPassword(loginUser.getPassword()))) {
+
+                if (storedHash.equals(loginUser.getPassword())) {
                     return Response.ok("{\"message\":\"Login successful\"}").build();
                 } else {
                     return Response.status(Response.Status.UNAUTHORIZED).build();
