@@ -1,25 +1,16 @@
 package com.netflixplus;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletContainer;
+
+import java.net.URI;
 
 public class App {
     public static void main(String[] args) {
-        Server server = new Server(8080);
         ResourceConfig config = new ResourceConfig()
-                .packages("com.netflixplus.api")
-                .register(org.glassfish.jersey.jackson.JacksonFeature.class);
-
-        ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        handler.setContextPath("/");
-
-        ServletHolder servlet = new ServletHolder(new ServletContainer(config));
-        handler.addServlet(servlet, "/*");
-
-        server.setHandler(handler);
+                .packages("com.netflixplus.api");
+        Server server = JettyHttpContainerFactory.createServer(URI.create("http://localhost:8080/"), config);
         try {
             server.start();
         } catch (Exception e) {
