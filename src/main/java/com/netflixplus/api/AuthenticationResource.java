@@ -65,8 +65,8 @@ public class AuthenticationResource {
             ps.setString(1, loginUser.getUsername());
             ResultSet rs = ps.executeQuery();
 
-            System.out.println("'" + loginUser.getUsername() + "'");
-            System.out.println(loginUser.getUsername().length());
+            //System.out.println("'" + loginUser.getUsername() + "'");
+            //System.out.println(loginUser.getUsername().length());
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
