@@ -64,11 +64,11 @@ public class AuthenticationResource {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM users where username = ?");
             ps.setString(1, loginUser.getUsername());
             ResultSet rs = ps.executeQuery();
+            System.out.println(loginUser.getUsername());
+            System.out.println(loginUser.getPassword());
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
-                System.out.println(loginUser.getUsername());
-                System.out.println(loginUser.getPassword());
                 System.out.println(storedHash);
                 System.out.println(rs.getString("username"));
 
