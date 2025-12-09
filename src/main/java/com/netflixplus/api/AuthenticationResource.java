@@ -67,6 +67,10 @@ public class AuthenticationResource {
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
+                System.out.println(loginUser.getUsername());
+                System.out.println(loginUser.getPassword());
+                System.out.println(storedHash);
+                System.out.println(rs.getString("username"));
 
                 if (storedHash.equals(loginUser.getPassword())) {
                     return Response.ok("{\"message\":\"Login successful\"}").build();
