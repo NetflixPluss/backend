@@ -71,9 +71,9 @@ public class AuthenticationResource {
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 String role = rs.getString("role");
-                System.out.println("Stored: " + storedHash);
-                System.out.println("Input: " + loginUser.getPassword());
-                System.out.println(storedHash.equals(loginUser.getPassword()));
+                //System.out.println("Stored: " + storedHash);
+                //System.out.println("Input: " + loginUser.getPassword());
+                //System.out.println(storedHash.equals(loginUser.getPassword()));
 
                 if (storedHash.equals(loginUser.getPassword())) {
                     String jsonResponse = String.format(
