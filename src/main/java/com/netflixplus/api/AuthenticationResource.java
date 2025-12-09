@@ -65,13 +65,14 @@ public class AuthenticationResource {
             ps.setString(1, loginUser.getUsername());
             ResultSet rs = ps.executeQuery();
 
-            System.out.println("Input: " + loginUser.getPassword());
             System.out.println("Hashed input: " + loginUser.getUsername());
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 String role = rs.getString("role");
                 System.out.println("Stored: " + storedHash);
+                System.out.println("Input: " + loginUser.getPassword());
+                System.out.println(storedHash.equals(loginUser.getPassword()));
 
                 if (storedHash.equals(loginUser.getPassword())) {
                     String jsonResponse = String.format(
