@@ -64,16 +64,18 @@ public class AuthenticationResource {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM users where username = ?");
             ps.setString(1, loginUser.getUsername());
             ResultSet rs = ps.executeQuery();
-            System.out.println(loginUser.getUsername());
-            System.out.println(loginUser.getPassword());
 
             if (rs.next()) {
                 String storedHash = rs.getString("password");
-                System.out.println(storedHash);
-                System.out.println(rs.getString("username"));
+                String role = rs.getString("role");
 
                 if (storedHash.equals(loginUser.getPassword())) {
-                    return Response.ok("{\"message\":\"Login successful\"}").build();
+                    String jsonResponse = String.format(
+                            "{\"username\":\"%s\", \"role\":\"%s\"}",
+                            loginUser.getUsername(),
+                            role
+                    );
+                    return Response.ok(jsonResponse).build();
                 } else {
                     return Response.status(Response.Status.UNAUTHORIZED).build();
                 }
