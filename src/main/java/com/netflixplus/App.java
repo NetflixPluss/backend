@@ -11,6 +11,7 @@ public class App {
         ResourceConfig config = new ResourceConfig()
                 .packages("com.netflixplus.api");
         Server server = JettyHttpContainerFactory.createServer(URI.create("http://localhost:8080/"), config);
+
         try {
             server.start();
         } catch (Exception e) {

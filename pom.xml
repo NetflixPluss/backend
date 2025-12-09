@@ -105,7 +105,7 @@
     </dependencies>
 
     <build>
-        <finalName>jersey-jetty</finalName>
+        <finalName>netflixplusbackend</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -154,7 +154,7 @@
                         <configuration>
                             <!-- exclude junit, we need runtime dependency only -->
                             <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+                            <outputDirectory>./build/lib/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
