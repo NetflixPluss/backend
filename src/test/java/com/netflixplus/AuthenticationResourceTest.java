@@ -18,7 +18,7 @@ public class AuthenticationResourceTest {
 
     @BeforeEach
     void setup() throws SQLException {
-        conn = DB.getConnection();
+        conn = DB.openConnection();
         auth = new AuthenticationResource();
     }
 

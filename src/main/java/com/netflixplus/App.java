@@ -16,11 +16,8 @@ import java.util.logging.Logger;
 
 public class App {
 
-
-    public static Connection con = DB.openConnection();
-
     public static void main(String[] args) {
-        ensureMasterExists(con);
+        ensureMasterExists();
 
         ResourceConfig config = new ResourceConfig()
                 .packages("com.netflixplus.api");
@@ -53,8 +50,8 @@ public class App {
         }
     }
 
-    private static void ensureMasterExists(Connection con) {
-        try {
+    private static void ensureMasterExists() {
+        try(Connection con = DB.openConnection()) {
             String checkSql = "SELECT COUNT(*) FROM users WHERE role='MASTER'";
             try (PreparedStatement ps = con.prepareStatement(checkSql)) {
                 ResultSet rs = ps.executeQuery();

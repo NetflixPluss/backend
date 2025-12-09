@@ -23,7 +23,7 @@ public class AuthenticationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response register(User newUser) {
-        try (Connection con = DB.getConnection()) {
+        try (Connection con = DB.openConnection()) {
             PreparedStatement check = con.prepareStatement("SELECT * FROM  users WHERE username = ?");
             check.setString(1, newUser.getUsername());
             ResultSet rs = check.executeQuery();
@@ -60,20 +60,14 @@ public class AuthenticationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(User loginUser) {
-        try (Connection con = DB.getConnection()) {
+        try (Connection con = DB.openConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM users where username = ?");
             ps.setString(1, loginUser.getUsername());
             ResultSet rs = ps.executeQuery();
 
-            //System.out.println("'" + loginUser.getUsername() + "'");
-            //System.out.println(loginUser.getUsername().length());
-
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 String role = rs.getString("role");
-                //System.out.println("Stored: " + storedHash);
-                //System.out.println("Input: " + loginUser.getPassword());
-                //System.out.println(storedHash.equals(loginUser.getPassword()));
 
                 if (storedHash.equals(loginUser.getPassword())) {
                     String jsonResponse = String.format(

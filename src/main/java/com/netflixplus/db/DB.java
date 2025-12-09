@@ -24,18 +24,6 @@ public class DB {
         }
     }
 
-    public static Connection getConnection() {
-        try {
-            System.out.println("getConnection " + url);
-            if (con == null || con.isClosed()) {
-                con = openConnection();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return con;
-    }
-
     public static void closeConnection() {
         try {
             if (con != null && !con.isClosed())

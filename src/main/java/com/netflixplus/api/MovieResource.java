@@ -24,7 +24,7 @@ public class MovieResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Movie> getAllMovies() {
         List<Movie> movies = new ArrayList<>();
-        try (Connection con = DB.getConnection();
+        try (Connection con = DB.openConnection();
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM movies")) {
              while (rs.next()) {
@@ -46,7 +46,7 @@ public class MovieResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Movie getMovieById(@PathParam("id") int id) {
-        try (Connection con = DB.getConnection();
+        try (Connection con = DB.openConnection();
              PreparedStatement ps = con.prepareStatement("SELECT * FROM movies WHERE id = ?")) {
 
             ps.setInt(1, id);
