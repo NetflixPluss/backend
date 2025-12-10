@@ -1,6 +1,7 @@
 package com.netflixplus.api;
 
 import com.netflixplus.db.DB;
+import com.netflixplus.model.RegisterRequest;
 import com.netflixplus.model.User;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -22,25 +23,48 @@ public class AuthenticationResource {
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response register(User newUser) {
+    public Response register(RegisterRequest request) {
         try (Connection con = DB.openConnection()) {
-            PreparedStatement check = con.prepareStatement("SELECT * FROM  users WHERE username = ?");
-            check.setString(1, newUser.getUsername());
-            ResultSet rs = check.executeQuery();
-            if (rs.next()) {
+
+            PreparedStatement auth = con.prepareStatement(
+                    "SELECT role FROM users WHERE username = ? AND password = ?"
+            );
+            auth.setString(1, request.getRequesterUsername());
+            auth.setString(2, request.getRequesterPassword());
+            ResultSet rsAuth = auth.executeQuery();
+
+            if (!rsAuth.next()) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("{\"message\":\"Invalid requester credentials\"}")
+                        .build();
+            }
+
+            String role = rsAuth.getString("role");
+            if (!role.equals("ADMIN") && !role.equals("MASTER")) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Insufficient permissions\"}")
+                        .build();
+            }
+
+            PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
+            check.setString(1, request.getNewUser().getUsername());
+            ResultSet rsCheck = check.executeQuery();
+            if (rsCheck.next()) {
                 return Response.status(Response.Status.CONFLICT)
                         .entity("{\"message\":\"Username already exists\"}")
                         .build();
             }
 
+            User newUser = request.getNewUser();
             newUser.setUserid(UUID.randomUUID().toString());
 
             PreparedStatement insert = con.prepareStatement(
-                    "INSERT INTO users (userid, username, password) VALUES (?, ?, ?)"
+                    "INSERT INTO users (userid, username, password, role) VALUES (?, ?, ?, ?)"
             );
             insert.setString(1, newUser.getUserid());
             insert.setString(2, newUser.getUsername());
             insert.setString(3, newUser.getPassword());
+            insert.setString(4, "USER");
             insert.executeUpdate();
 
             return Response.status(Response.Status.CREATED)
