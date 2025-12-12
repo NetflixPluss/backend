@@ -26,6 +26,7 @@ public class AuthenticationResource {
     public Response register(RegisterRequest request) {
         try (Connection con = DB.openConnection()) {
 
+            System.out.println(request.getRequesterPassword());
             PreparedStatement auth = con.prepareStatement(
                     "SELECT role FROM users WHERE username = ? AND password = ?"
             );
