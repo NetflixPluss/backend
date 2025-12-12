@@ -26,12 +26,11 @@ public class AuthenticationResource {
     public Response register(RegisterRequest request) {
         try (Connection con = DB.openConnection()) {
 
-            System.out.println(request.getRequesterPassword());
             PreparedStatement auth = con.prepareStatement(
                     "SELECT role FROM users WHERE username = ? AND password = ?"
             );
             auth.setString(1, request.getRequesterUsername());
-            auth.setString(2, request.getRequesterPassword());
+            auth.setString(2, User.hashPassword(request.getRequesterPassword()));
             ResultSet rsAuth = auth.executeQuery();
 
             if (!rsAuth.next()) {
