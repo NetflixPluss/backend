@@ -1,12 +1,8 @@
 package com.netflixplus.api;
 
 import com.netflixplus.db.DB;
-import com.netflixplus.model.RegisterRequest;
 import com.netflixplus.model.User;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -19,64 +15,37 @@ import java.util.UUID;
 @Path("/auth")
 public class AuthenticationResource {
 
-    @POST
-    @Path("/register")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response register(RegisterRequest request) {
-        try (Connection con = DB.openConnection()) {
+    public static User requireAdminOrMaster(Connection con, String username, String password) throws SQLException {
 
-            PreparedStatement auth = con.prepareStatement(
-                    "SELECT role FROM users WHERE username = ? AND password = ?"
+        PreparedStatement auth = con.prepareStatement(
+                "SELECT userid, username, role FROM users WHERE username = ? AND password = ?"
+        );
+        auth.setString(1, username);
+        auth.setString(2, User.hashPassword(password));
+        ResultSet rs = auth.executeQuery();
+
+        if (!rs.next()) {
+            throw new WebApplicationException(
+                    Response.status(Response.Status.UNAUTHORIZED)
+                            .entity("{\"message\":\"Invalid requester credentials\"}")
+                            .build()
             );
-            auth.setString(1, request.getRequesterUsername());
-            auth.setString(2, User.hashPassword(request.getRequesterPassword()));
-            ResultSet rsAuth = auth.executeQuery();
-
-            if (!rsAuth.next()) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("{\"message\":\"Invalid requester credentials\"}")
-                        .build();
-            }
-
-            String role = rsAuth.getString("role");
-            if (!role.equals("ADMIN") && !role.equals("MASTER")) {
-                return Response.status(Response.Status.FORBIDDEN)
-                        .entity("{\"message\":\"Insufficient permissions\"}")
-                        .build();
-            }
-
-            PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
-            check.setString(1, request.getNewUser().getUsername());
-            ResultSet rsCheck = check.executeQuery();
-            if (rsCheck.next()) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity("{\"message\":\"Username already exists\"}")
-                        .build();
-            }
-
-            User newUser = request.getNewUser();
-            newUser.setUserid(UUID.randomUUID().toString());
-
-            PreparedStatement insert = con.prepareStatement(
-                    "INSERT INTO users (userid, username, password, role) VALUES (?, ?, ?, ?)"
-            );
-            insert.setString(1, newUser.getUserid());
-            insert.setString(2, newUser.getUsername());
-            insert.setString(3, newUser.getPassword());
-            insert.setString(4, "USER");
-            insert.executeUpdate();
-
-            return Response.status(Response.Status.CREATED)
-                    .entity("{\"message\":\"Register success\"}")
-                    .build();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"message\":\"Server error\"}")
-                    .build();
         }
+
+        User user = new User();
+        user.setUserid(rs.getString("userid"));
+        user.setUsername(rs.getString("username"));
+        user.setRole(rs.getString("role"));
+
+        if (!user.getRole().equals("ADMIN") && !user.getRole().equals("MASTER")) {
+            throw new WebApplicationException(
+                    Response.status(Response.Status.FORBIDDEN)
+                            .entity("{\"message\":\"Insufficient permissions\"}")
+                            .build()
+            );
+        }
+
+        return user;
     }
 
     @POST

@@ -6,6 +6,7 @@ public class User {
     private String userid;
     private String username;
     private String password;
+    private String role;
 
     public static String hashPassword(String password) {
         try {
@@ -29,4 +30,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = hashPassword(password); }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }
