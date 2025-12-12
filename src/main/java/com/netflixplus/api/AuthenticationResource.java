@@ -15,13 +15,13 @@ import java.util.UUID;
 @Path("/auth")
 public class AuthenticationResource {
 
-    public static User requireAdminOrMaster(Connection con, String username, String password) throws SQLException {
+    public static void requireAdminOrMaster(Connection con, String username, String password) throws SQLException {
 
         PreparedStatement auth = con.prepareStatement(
                 "SELECT userid, username, role FROM users WHERE username = ? AND password = ?"
         );
         auth.setString(1, username);
-        auth.setString(2, User.hashPassword(password));
+        auth.setString(2, password);
         ResultSet rs = auth.executeQuery();
 
         if (!rs.next()) {
@@ -44,8 +44,6 @@ public class AuthenticationResource {
                             .build()
             );
         }
-
-        return user;
     }
 
     @POST
