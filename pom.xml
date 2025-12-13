@@ -54,6 +54,12 @@
             <version>5.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
         <!-- add jackson to support json -->
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
