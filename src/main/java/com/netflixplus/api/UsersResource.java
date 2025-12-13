@@ -176,7 +176,6 @@ public class UsersResource {
 
 
     @POST
-    @Path("/users")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers(User authAdmin) {
