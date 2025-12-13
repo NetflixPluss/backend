@@ -19,7 +19,7 @@ public class ChangeRoleRequest {
     }
 
     public void setRequesterPassword(String requesterPassword) {
-        this.requesterPassword = requesterPassword;
+        this.requesterPassword = User.hashPassword(requesterPassword);
     }
 
     public String getTargetUsername() {
