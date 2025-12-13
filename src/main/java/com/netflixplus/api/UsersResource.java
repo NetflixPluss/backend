@@ -64,7 +64,7 @@ public class UsersResource {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response delete(RegisterRequest request) {
+    public Response delete(DeleteRequest request) {
         try (Connection con = DB.openConnection()) {
             User requester = AuthenticationResource.requireAdminOrMaster(
                     con,
@@ -73,7 +73,7 @@ public class UsersResource {
             );
 
             PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
-            check.setString(1, request.getNewUser().getUsername());
+            check.setString(1, request.getToDeleteUsername());
             ResultSet rsCheck = check.executeQuery();
             if (!rsCheck.next()) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -93,7 +93,7 @@ public class UsersResource {
             PreparedStatement delete = con.prepareStatement(
                     "DELETE FROM users WHERE username = ?"
             );
-            delete.setString(1, request.getNewUser().getUsername());
+            delete.setString(1, request.getToDeleteUsername());
             delete.executeUpdate();
 
             return Response.ok("{\"message\":\"User deleted successfully\"}").build();
