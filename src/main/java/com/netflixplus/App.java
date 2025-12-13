@@ -5,6 +5,7 @@ import org.eclipse.jetty.server.Server;
 import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import com.netflixplus.db.DB;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -20,7 +21,8 @@ public class App {
         ensureMasterExists();
 
         ResourceConfig config = new ResourceConfig()
-                .packages("com.netflixplus.api");
+                .packages("com.netflixplus.api")
+                .register(MultiPartFeature.class);
         Server server = JettyHttpContainerFactory.createServer(URI.create("http://localhost:8080/"), config);
 
         try {

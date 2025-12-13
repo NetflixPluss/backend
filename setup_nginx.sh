@@ -12,6 +12,8 @@ else
 fi
 
 VIDEODIR=./videos
+HLSHD=/var/www/netflixplus/hls/1080p
+HLSSD=/var/www/netflixplus/hls/360p
 
 if ! [ -d "$VIDEODIR" ]; then
   echo "The $VIDEODIR directory does not exists. Creating..."
@@ -19,6 +21,17 @@ if ! [ -d "$VIDEODIR" ]; then
 else
   echo "The $VIDEODIR directory already exists."
 fi
+
+for dir in "$HLSHD" "$HLSSD"; do
+  if ! [ -d "$dir" ]; then
+    echo "Creating HLS directory $dir..."
+    sudo mkdir -p "$dir"
+    sudo chown "$USER":"$USER" "$dir"
+    sudo chmod 755 "$dir"
+  else
+    echo "HLS directory $dir already exists."
+  fi
+done
 
 sudo cp ./nginx.conf /etc/nginx/
 
