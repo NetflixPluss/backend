@@ -1,9 +1,7 @@
 package com.netflixplus.api;
 
 import com.netflixplus.db.DB;
-import com.netflixplus.model.Movie;
-import com.netflixplus.model.RegisterRequest;
-import com.netflixplus.model.User;
+import com.netflixplus.model.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -23,7 +21,11 @@ public class UsersResource {
     public Response register(RegisterRequest request) {
         try (Connection con = DB.openConnection()) {
 
-            AuthenticationResource.requireAdminOrMaster(con, request.getRequesterUsername(), request.getRequesterPassword());
+            AuthenticationResource.requireAdminOrMaster(
+                    con,
+                    request.getRequesterUsername(),
+                    request.getRequesterPassword()
+            );
 
             PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
             check.setString(1, request.getNewUser().getUsername());
@@ -57,6 +59,121 @@ public class UsersResource {
                     .build();
         }
     }
+
+    @POST
+    @Path("/delete")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(RegisterRequest request) {
+        try (Connection con = DB.openConnection()) {
+            User requester = AuthenticationResource.requireAdminOrMaster(
+                    con,
+                    request.getRequesterUsername(),
+                    request.getRequesterPassword()
+            );
+
+            PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
+            check.setString(1, request.getNewUser().getUsername());
+            ResultSet rsCheck = check.executeQuery();
+            if (!rsCheck.next()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"message\":\"User does not exist\"}")
+                        .build();
+            }
+
+            Role requesterRole = Role.fromString(requester.getRole());
+            Role targetRole = Role.fromString(rsCheck.getString("role"));
+
+            if (requesterRole.level <= targetRole.level) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Cannot delete user with equal or higher role\"}")
+                        .build();
+            }
+
+            PreparedStatement delete = con.prepareStatement(
+                    "DELETE FROM users WHERE username = ?"
+            );
+            delete.setString(1, request.getNewUser().getUsername());
+            delete.executeUpdate();
+
+            return Response.ok("{\"message\":\"User deleted successfully\"}").build();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"message\":\"Server error\"}")
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/role")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response changeRole(ChangeRoleRequest request) {
+
+        try (Connection con = DB.openConnection()) {
+
+            User requester = AuthenticationResource.requireAdminOrMaster(
+                    con,
+                    request.getRequesterUsername(),
+                    request.getRequesterPassword()
+            );
+
+            Role requesterRole = Role.fromString(requester.getRole());
+
+            if (requesterRole == Role.USER) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Users cannot change roles\"}")
+                        .build();
+            }
+
+            PreparedStatement ps = con.prepareStatement(
+                    "SELECT userid, role FROM users WHERE username = ?"
+            );
+            ps.setString(1, request.getTargetUsername());
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"message\":\"Target user not found\"}")
+                        .build();
+            }
+
+            Role targetRole = Role.fromString(rs.getString("role"));
+            Role newRole = Role.fromString(request.getNewRole());
+
+            if (requesterRole.level <= targetRole.level) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Cannot modify user with equal or higher role\"}")
+                        .build();
+            }
+
+            if (newRole.level >= requesterRole.level) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Cannot assign role equal or higher than yours\"}")
+                        .build();
+            }
+
+            PreparedStatement update = con.prepareStatement(
+                    "UPDATE users SET role = ? WHERE username = ?"
+            );
+            update.setString(1, newRole.name());
+            update.setString(2, request.getTargetUsername());
+            update.executeUpdate();
+
+            return Response.ok("{\"message\":\"Role updated successfully\"}").build();
+
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"message\":\"Server error\"}")
+                    .build();
+        }
+    }
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

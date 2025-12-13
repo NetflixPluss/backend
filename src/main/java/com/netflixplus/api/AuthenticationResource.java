@@ -10,12 +10,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.UUID;
 
 @Path("/auth")
 public class AuthenticationResource {
 
-    public static void requireAdminOrMaster(Connection con, String username, String password) throws SQLException {
+    public static User requireAdminOrMaster(Connection con, String username, String password) throws SQLException {
 
         PreparedStatement auth = con.prepareStatement(
                 "SELECT userid, username, role FROM users WHERE username = ? AND password = ?"
@@ -44,6 +43,8 @@ public class AuthenticationResource {
                             .build()
             );
         }
+
+        return user;
     }
 
     @POST
