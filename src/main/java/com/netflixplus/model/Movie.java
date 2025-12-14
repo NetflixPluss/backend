@@ -1,7 +1,7 @@
 package com.netflixplus.model;
 
 public class Movie {
-    private int movieid;
+    private String movieid;
 
     private String title;
     private String description;
@@ -11,7 +11,7 @@ public class Movie {
 
     public Movie() {}
 
-    public Movie(int movieid, String title, String description, String file_hd, String file_sd, String status) {
+    public Movie(String movieid, String title, String description, String file_hd, String file_sd, String status) {
         this.movieid = movieid;
         this.title = title;
         this.description = description;
@@ -28,11 +28,11 @@ public class Movie {
         this.title = title;
     }
 
-    public int getMovieid() {
+    public String getMovieid() {
         return movieid;
     }
 
-    public void setMovieid(int movieid) {
+    public void setMovieid(String movieid) {
         this.movieid = movieid;
     }
 
