@@ -137,16 +137,33 @@ public class MovieResource {
         System.out.println("Output dir writable: " + outputDir.canWrite());
         System.out.println("Running as user: " + System.getProperty("user.name"));
 
+        String videoBitrate = (height == 1080) ? "3000k" : "800k";
+        String audioBitrate = (height == 1080) ? "128k" : "96k";
+
         String[] cmd = {
                 "ffmpeg",
                 "-y",
                 "-i", input,
-                "-vf", "scale=" + width + ":" + height,
+
+                "-vf", "scale=" + width + ":" + height + ":flags=fast_bilinear",
+
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-profile:v", "main",
+                "-level", "4.0",
+                "-b:v", videoBitrate,
+                "-maxrate", videoBitrate,
+                "-bufsize", "6000k",
+                "-g", "48",
+                "-sc_threshold", "0",
+
                 "-c:a", "aac",
-                "-c:v", "h264",
-                "-start_number", "0",
-                "-hls_time", "10",
-                "-hls_list_size", "0",
+                "-b:a", audioBitrate,
+
+                "-hls_time", "6",
+                "-hls_list_size", "6",
+                "-hls_flags", "delete_segments+append_list",
+
                 "-f", "hls",
                 outputM3U8
         };
