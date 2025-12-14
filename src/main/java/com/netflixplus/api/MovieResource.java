@@ -1,8 +1,11 @@
 package com.netflixplus.api;
 
 import com.netflixplus.db.DB;
+import com.netflixplus.model.DeleteRequest;
 import com.netflixplus.model.Movie;
 
+import com.netflixplus.model.Role;
+import com.netflixplus.model.User;
 import com.netflixplus.processing.VideoProcessor;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -169,13 +172,45 @@ public class MovieResource {
         if (exit != 0) throw new RuntimeException("FFmpeg failed for movie " + movieId);
     }
 
-    @DELETE
-    @Path("/{movieId}")
-    public Response deleteMovie(@PathParam("movieId") String movieId) {
-        VideoProcessor.cancel(movieId);
-        updateStatus(movieId, "DELETED");
-        deleteFiles(movieId);
-        return Response.ok("{\"message\":\"Deleted\"}").build();
+    @POST
+    @Path("/delete")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteMovie(DeleteRequest request) {
+        try (Connection con = DB.openConnection()) {
+            User requester = AuthenticationResource.requireAdminOrMaster(
+                    con,
+                    request.getRequesterUsername(),
+                    request.getRequesterPassword()
+            );
+
+            String movieId = request.getToDeleteIdentifier();
+
+            PreparedStatement check = con.prepareStatement("SELECT * FROM movies WHERE movieid = ?");
+            check.setString(1, movieId);
+            ResultSet rsCheck = check.executeQuery();
+            if (!rsCheck.next()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"message\":\"Movie does not exist\"}")
+                        .build();
+            }
+
+            PreparedStatement delete = con.prepareStatement(
+                    "DELETE FROM movies WHERE movieid = ?"
+            );
+            delete.setString(1, movieId);
+            delete.executeUpdate();
+
+            VideoProcessor.cancel(movieId);
+            deleteFiles(movieId);
+            return Response.ok("{\"message\":\"Deleted\"}").build();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"message\":\"Server error\"}")
+                    .build();
+        }
     }
 
     private void updateStatus(String movieId, String status) {

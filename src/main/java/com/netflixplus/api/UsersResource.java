@@ -73,7 +73,7 @@ public class UsersResource {
             );
 
             PreparedStatement check = con.prepareStatement("SELECT * FROM users WHERE username = ?");
-            check.setString(1, request.getToDeleteUsername());
+            check.setString(1, request.getToDeleteIdentifier());
             ResultSet rsCheck = check.executeQuery();
             if (!rsCheck.next()) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -93,7 +93,7 @@ public class UsersResource {
             PreparedStatement delete = con.prepareStatement(
                     "DELETE FROM users WHERE username = ?"
             );
-            delete.setString(1, request.getToDeleteUsername());
+            delete.setString(1, request.getToDeleteIdentifier());
             delete.executeUpdate();
 
             return Response.ok("{\"message\":\"User deleted successfully\"}").build();

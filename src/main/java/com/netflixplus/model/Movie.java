@@ -9,8 +9,6 @@ public class Movie {
     private String file_hd;
     private String status;
 
-    public Movie() {}
-
     public Movie(String movieid, String title, String description, String file_hd, String file_sd, String status) {
         this.movieid = movieid;
         this.title = title;
