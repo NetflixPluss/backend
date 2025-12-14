@@ -11,6 +11,14 @@ else
   echo "NGINX found."
 fi
 
+if ! command -v ffmpeg &> /dev/null
+then
+  echo "FFmpeg not found. Installing..."
+  sudo apt install -y ffmpeg
+else
+  echo "FFmpeg found."
+fi
+
 VIDEODIR=./videos
 HLSHD=/var/www/netflixplus/hls/1080p
 HLSSD=/var/www/netflixplus/hls/360p
