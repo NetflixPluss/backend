@@ -89,13 +89,13 @@ public class MovieResource {
 
         try {
             Files.copy(uploadedInputStream, tempMp4.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            File hdFolder = new File(storagePathHD + movieId);
-            File sdFolder = new File(storagePathSD + movieId);
+            File hdFolder = new File(storagePathHD);
+            File sdFolder = new File(storagePathSD);
             hdFolder.mkdirs();
             sdFolder.mkdirs();
 
-            String hdPlaylist = new File(hdFolder, "playlist.m3u8").getAbsolutePath();
-            String sdPlaylist = new File(sdFolder, "playlist.m3u8").getAbsolutePath();
+            String hdPlaylist = new File(hdFolder, movieId+".m3u8").getAbsolutePath();
+            String sdPlaylist = new File(sdFolder, movieId+".m3u8").getAbsolutePath();
 
             executeHLSCommand(tempMp4.getAbsolutePath(), hdPlaylist, 1920, 1080);
 
@@ -110,8 +110,8 @@ public class MovieResource {
                 ps.setString(1, movieId);
                 ps.setString(2, title);
                 ps.setString(3, description);
-                ps.setString(4, "/movies/1080p/" + movieId + "/playlist.m3u8");
-                ps.setString(5, "/movies/360p/" + movieId + "/playlist.m3u8");
+                ps.setString(4, "/movies/1080p/" + movieId + ".m3u8");
+                ps.setString(5, "/movies/360p/" + movieId + ".m3u8");
                 ps.executeUpdate();
             }
 
