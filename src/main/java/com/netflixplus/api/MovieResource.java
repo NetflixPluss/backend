@@ -186,8 +186,6 @@ public class MovieResource {
 
             String movieId = request.getToDeleteIdentifier();
 
-            System.out.println("Checking if movie exists: " + movieId);
-
             PreparedStatement check = con.prepareStatement("SELECT * FROM movies WHERE movieid = ?");
             check.setString(1, movieId);
             ResultSet rsCheck = check.executeQuery();
