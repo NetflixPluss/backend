@@ -95,18 +95,6 @@ public class App {
                     ")";
             stmt.executeUpdate(moviesSql);
 
-            String chunkSql = "CREATE TABLE IF NOT EXISTS movie_chunk (" +
-                    "movieId TEXT, " +
-                    "quality TEXT, " +
-                    "format TEXT, " +
-                    "chunkIndex INT, " +
-                    "path TEXT, " +
-                    "hash TEXT, " +
-                    "available BOOLEAN, " +
-                    "PRIMARY KEY(movieId, quality, format, chunkIndex)" +
-                    ")";
-            stmt.executeUpdate(chunkSql);
-
             System.out.println("Database tables ensured.");
 
         } catch (SQLException e) {
