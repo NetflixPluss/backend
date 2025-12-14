@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -87,7 +88,7 @@ public class MovieResource {
         File tempMp4 = new File("/tmp/" + fileDetail.getFileName());
 
         try {
-            Files.copy(uploadedInputStream, tempMp4.toPath());
+            Files.copy(uploadedInputStream, tempMp4.toPath(), StandardCopyOption.REPLACE_EXISTING);
             File hdFolder = new File(storagePathHD + movieId);
             File sdFolder = new File(storagePathSD + movieId);
             hdFolder.mkdirs();

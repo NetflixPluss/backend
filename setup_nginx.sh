@@ -19,6 +19,13 @@ else
   echo "FFmpeg found."
 fi
 
+if ! command -v mvn &> /dev/null; then
+  echo "Maven not found. Installing..."
+  sudo apt install -y maven
+else
+  echo "Maven found."
+fi
+
 VIDEODIR=./videos
 HLSHD=/var/www/netflixplus/hls/1080p
 HLSSD=/var/www/netflixplus/hls/360p
@@ -52,3 +59,11 @@ else
 fi
 
 echo "NGINX started with success!"
+
+echo "Building backend with Maven..."
+mvn clean package || { echo "Maven build failed"; exit 1; }
+
+echo "Starting backend..."
+java -jar target/netflixplusbackend.jar &
+
+echo "Setup completed successfully!"
