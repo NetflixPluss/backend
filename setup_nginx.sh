@@ -33,7 +33,7 @@ for dir in "$HLSHD" "$HLSSD"; do
   if ! [ -d "$dir" ]; then
     echo "Creating HLS directory $dir..."
     sudo mkdir -p "$dir"
-    sudo chown "$USER":"$USER" "$dir"
+    sudo chown -R "$USER":"$USER" "$dir"
     sudo chmod 755 "$dir"
   else
     echo "HLS directory $dir already exists."
