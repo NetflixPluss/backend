@@ -35,27 +35,32 @@ public class MovieResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Movie> getAllMovies() {
         List<Movie> movies = new ArrayList<>();
+        String sql = "SELECT * FROM movies";
         try (Connection con = DB.openConnection();
              Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM movies")) {
-             while (rs.next()) {
-                 movies.add(new Movie(
-                         rs.getString("movieid"),
-                         rs.getString("title"),
-                         rs.getString("description"),
-                         rs.getString("file_hd"),
-                         rs.getString("file_sd"),
-                         rs.getString("status")
-                 ));
-             }
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                movies.add(new Movie(
+                        rs.getString("movieid"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("path_hls_hd"),
+                        rs.getString("path_hls_sd"),
+                        rs.getString("path_mp4_hd"),
+                        rs.getString("path_mp4_sd"),
+                        rs.getString("status")
+                ));
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return movies;
     }
 
-    private static final String STORAGE_HD = "/var/www/netflixplus/hls/1080p/";
-    private static final String STORAGE_SD = "/var/www/netflixplus/hls/360p/";
+    private static final String STORAGE_HD = "/var/www/netflixplus/1080p/";
+    private static final String STORAGE_SD = "/var/www/netflixplus/360p/";
     private static final ExecutorService uploadExecutor = Executors.newFixedThreadPool(4);
 
     @POST
@@ -111,11 +116,14 @@ public class MovieResource {
     }
 
     private void processVideo(String movieId, File inputFile) {
-        File hdDir = new File(STORAGE_HD, movieId);
-        File sdDir = new File(STORAGE_SD, movieId);
+        File hdDir = new File(STORAGE_HD+"/hls/", movieId);
+        File sdDir = new File(STORAGE_SD+"/hls/", movieId);
 
         hdDir.mkdirs();
         sdDir.mkdirs();
+
+        String hdMp4 = new File(STORAGE_HD+"/mp4/", movieId).getAbsolutePath();
+        String sdMp4 = new File(STORAGE_SD+"/mp4/", movieId).getAbsolutePath();
 
         String hdM3u8 = new File(hdDir, "playlist.m3u8").getAbsolutePath();
         String sdM3u8 = new File(sdDir, "playlist.m3u8").getAbsolutePath();
@@ -123,16 +131,21 @@ public class MovieResource {
         try {
             System.out.println("Processing video: " + movieId);
 
-            executeHLS(inputFile.getAbsolutePath(), hdM3u8, 1920, 1080, movieId);
-            executeHLS(inputFile.getAbsolutePath(), sdM3u8, 640, 360, movieId);
+            executeHLS(inputFile.getAbsolutePath(), hdM3u8, 1920, 1080, movieId+"HLS_HD");
+            executeHLS(inputFile.getAbsolutePath(), sdM3u8, 640, 360, movieId+"HLS_SD");
+
+            executeMP4(inputFile.getAbsolutePath(), hdMp4, 1920, 1080, movieId+"MP4_HD");
+            executeMP4(inputFile.getAbsolutePath(), sdMp4, 640, 360, movieId+"MP4_HD");
 
             try (Connection con = DB.openConnection();
                  PreparedStatement ps = con.prepareStatement(
-                         "UPDATE movies SET file_hd=?, file_sd=?, status=? WHERE movieid=?")) {
-                ps.setString(1, "/movies/1080p/" + movieId + "/playlist.m3u8");
-                ps.setString(2, "/movies/360p/" + movieId + "/playlist.m3u8");
-                ps.setString(3, "READY");
-                ps.setString(4, movieId);
+                         "UPDATE movies SET path_hls_hd=?, path_hls_sd=?, path_mp4_hd=?, path_mp4_sd=?, status=? WHERE movieid=?")) {
+                ps.setString(1, "/movies/1080p/hls/" + movieId + "/playlist.m3u8");
+                ps.setString(2, "/movies/360p/hls/" + movieId + "/playlist.m3u8");
+                ps.setString(3, "/movies/1080p/mp4/" + movieId);
+                ps.setString(4, "/movies/360p/mp4/" + movieId);
+                ps.setString(5, "READY");
+                ps.setString(6, movieId);
                 ps.executeUpdate();
             }
 
@@ -146,12 +159,41 @@ public class MovieResource {
         }
     }
 
+    private void executeMP4(String input, String output, int width, int height, String processId) throws Exception {
+        String[] cmd = {
+                "ffmpeg",
+                "-y",
+                "-i", input,
+                "-vf", "scale=" + width + ":" + height,
+                "-c:v", "libx264",
+                "-preset", "ultrafast",
+                "-crf", "23",
+                "-c:a", "aac",
+                output
+        };
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        VideoProcessor.registerProcess(processId, process);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("[FFMPEG] " + line);
+            }
+        }
+
+        int exit = process.waitFor();
+        if (exit != 0) throw new RuntimeException("FFmpeg MP4 failed for " + processId);
+    }
+
     private void executeHLS(
             String input,
             String output,
             int width,
             int height,
-            String movieId
+            String processId
     ) throws Exception {
 
         String[] cmd = {
@@ -172,7 +214,7 @@ public class MovieResource {
         ProcessBuilder pb = new ProcessBuilder(cmd);
         pb.redirectErrorStream(true);
         Process process = pb.start();
-        VideoProcessor.registerProcess(movieId, process);
+        VideoProcessor.registerProcess(processId, process);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
@@ -182,7 +224,7 @@ public class MovieResource {
         }
 
         int exit = process.waitFor();
-        if (exit != 0) throw new RuntimeException("FFmpeg failed for movie " + movieId);
+        if (exit != 0) throw new RuntimeException("FFmpeg failed for movie " + processId);
     }
 
     @POST

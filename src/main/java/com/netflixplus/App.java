@@ -8,10 +8,7 @@ import com.netflixplus.db.DB;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +16,7 @@ public class App {
 
     public static void main(String[] args) {
         ensureMasterExists();
+        ensureTablesExist();
 
         ResourceConfig config = new ResourceConfig()
                 .packages("com.netflixplus.api")
@@ -73,5 +71,48 @@ public class App {
             e.printStackTrace();
         }
     }
+
+    private static void ensureTablesExist() {
+        try (Connection con = DB.openConnection(); Statement stmt = con.createStatement()) {
+
+            String usersSql = "CREATE TABLE IF NOT EXISTS users (" +
+                    "userid VARCHAR(50) PRIMARY KEY, " +
+                    "username VARCHAR(100) UNIQUE NOT NULL, " +
+                    "password VARCHAR(256) NOT NULL, " +
+                    "role ENUM('USER','ADMIN','MASTER') NOT NULL DEFAULT 'USER'" +
+                    ")";
+            stmt.executeUpdate(usersSql);
+
+            String moviesSql = "CREATE TABLE IF NOT EXISTS movies (" +
+                    "movieid TEXT PRIMARY KEY, " +
+                    "title TEXT, " +
+                    "description TEXT, " +
+                    "status TEXT, " +
+                    "path_hls_hd TEXT, " +
+                    "path_hls_sd TEXT, " +
+                    "path_mp4_hd TEXT, " +
+                    "path_mp4_sd TEXT" +
+                    ")";
+            stmt.executeUpdate(moviesSql);
+
+            String chunkSql = "CREATE TABLE IF NOT EXISTS movie_chunk (" +
+                    "movieId TEXT, " +
+                    "quality TEXT, " +
+                    "format TEXT, " +
+                    "chunkIndex INT, " +
+                    "path TEXT, " +
+                    "hash TEXT, " +
+                    "available BOOLEAN, " +
+                    "PRIMARY KEY(movieId, quality, format, chunkIndex)" +
+                    ")";
+            stmt.executeUpdate(chunkSql);
+
+            System.out.println("Database tables ensured.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

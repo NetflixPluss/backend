@@ -2,67 +2,51 @@ package com.netflixplus.model;
 
 public class Movie {
     private String movieid;
-
     private String title;
     private String description;
-    private String file_sd;
-    private String file_hd;
+
+    private String pathHlsHd;
+    private String pathHlsSd;
+    private String pathMp4Hd;
+    private String pathMp4Sd;
+
     private String status;
 
-    public Movie(String movieid, String title, String description, String file_hd, String file_sd, String status) {
+    public Movie(String movieid, String title, String description,
+                 String pathHlsHd, String pathHlsSd,
+                 String pathMp4Hd, String pathMp4Sd,
+                 String status) {
         this.movieid = movieid;
         this.title = title;
         this.description = description;
-        this.file_hd = file_hd;
-        this.file_sd = file_sd;
+        this.pathHlsHd = pathHlsHd;
+        this.pathHlsSd = pathHlsSd;
+        this.pathMp4Hd = pathMp4Hd;
+        this.pathMp4Sd = pathMp4Sd;
         this.status = status;
     }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getMovieid() { return movieid; }
+    public void setMovieid(String movieid) { this.movieid = movieid; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getMovieid() {
-        return movieid;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setMovieid(String movieid) {
-        this.movieid = movieid;
-    }
+    public String getPathHlsHd() { return pathHlsHd; }
+    public void setPathHlsHd(String pathHlsHd) { this.pathHlsHd = pathHlsHd; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getPathHlsSd() { return pathHlsSd; }
+    public void setPathHlsSd(String pathHlsSd) { this.pathHlsSd = pathHlsSd; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getPathMp4Hd() { return pathMp4Hd; }
+    public void setPathMp4Hd(String pathMp4Hd) { this.pathMp4Hd = pathMp4Hd; }
 
-    public String getFile_sd() {
-        return file_sd;
-    }
+    public String getPathMp4Sd() { return pathMp4Sd; }
+    public void setPathMp4Sd(String pathMp4Sd) { this.pathMp4Sd = pathMp4Sd; }
 
-    public void setFile_sd(String file_sd) {
-        this.file_sd = file_sd;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getFile_hd() {
-        return file_hd;
-    }
-
-    public void setFile_hd(String file_hd) {
-        this.file_hd = file_hd;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

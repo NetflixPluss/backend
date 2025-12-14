@@ -1,14 +1,12 @@
 package com.netflixplus.processing;
 
-import java.io.File;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 public class VideoProcessor {
 
     private static final ExecutorService executor =
-            Executors.newFixedThreadPool(2);
+            Executors.newFixedThreadPool(8);
 
     private static final Map<String, Process> runningProcesses =
             new ConcurrentHashMap<>();
