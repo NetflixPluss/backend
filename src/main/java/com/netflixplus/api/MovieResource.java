@@ -217,8 +217,15 @@ public class MovieResource {
         File hdDir = new File(STORAGE_HD, movieId);
         File sdDir = new File(STORAGE_SD, movieId);
 
-        if (hdDir.exists()) deleteDirectoryRecursively(hdDir);
-        if (sdDir.exists()) deleteDirectoryRecursively(sdDir);
+        if (hdDir.exists()) {
+            for (File f : hdDir.listFiles()) f.delete();
+            hdDir.delete();
+        }
+
+        if (sdDir.exists()) {
+            for (File f : sdDir.listFiles()) f.delete();
+            sdDir.delete();
+        }
     }
 
     private void deleteDirectoryRecursively(File dir) {
