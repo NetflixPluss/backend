@@ -63,7 +63,9 @@ echo "NGINX started with success!"
 echo "Building backend with Maven..."
 mvn clean package || { echo "Maven build failed"; exit 1; }
 
-echo "Starting backend..."
-java -jar target/netflixplusbackend.jar &
+echo "Moving backend JAR to build/ directory..."
+mv target/netflixplusbackend.jar build/netflixplusbackend.jar
 
-echo "Setup completed successfully!"
+echo "Starting backend..."
+nohup java -jar build/netflixplusbackend.jar > build/backend.log 2>&1 &
+echo "Backend started successfully!"
