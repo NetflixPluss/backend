@@ -1,35 +1,70 @@
 package com.netflixplus.model;
 
 public class Movie {
-    private int id;
+    private int movieid;
 
     private String title;
     private String description;
-    private String url360;
-    private String url1080;
+    private String file_sd;
+    private String file_hd;
+    private String status;
 
     public Movie() {}
 
-    public Movie(int id, String title, String description, String url360, String url1080) {
-        this.id = id;
+    public Movie(int movieid, String title, String description, String file_hd, String file_sd, String status) {
+        this.movieid = movieid;
         this.title = title;
         this.description = description;
-        this.url360 = url360;
-        this.url1080 = url1080;
+        this.file_hd = file_hd;
+        this.file_sd = file_sd;
+        this.status = status;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public int getMovieid() {
+        return movieid;
+    }
 
-    public String getUrl360() { return url360; }
-    public void setUrl360(String url360) { this.url360 = url360; }
+    public void setMovieid(int movieid) {
+        this.movieid = movieid;
+    }
 
-    public String getUrl1080() { return url1080; }
-    public void setUrl1080(String url1080) { this.url1080 = url1080; }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getFile_sd() {
+        return file_sd;
+    }
+
+    public void setFile_sd(String file_sd) {
+        this.file_sd = file_sd;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getFile_hd() {
+        return file_hd;
+    }
+
+    public void setFile_hd(String file_hd) {
+        this.file_hd = file_hd;
+    }
 }

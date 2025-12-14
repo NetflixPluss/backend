@@ -37,11 +37,12 @@ public class MovieResource {
              ResultSet rs = stmt.executeQuery("SELECT * FROM movies")) {
              while (rs.next()) {
                  movies.add(new Movie(
-                         rs.getInt("id"),
+                         rs.getInt("movieid"),
                          rs.getString("title"),
                          rs.getString("description"),
-                         rs.getString("url360"),
-                         rs.getString("url1080")
+                         rs.getString("file_hd"),
+                         rs.getString("file_sd"),
+                         rs.getString("status")
                  ));
              }
         } catch (SQLException e) {
@@ -55,17 +56,18 @@ public class MovieResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Movie getMovieById(@PathParam("id") int id) {
         try (Connection con = DB.openConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM movies WHERE id = ?")) {
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM movies WHERE movied = ?")) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new Movie(
-                        rs.getInt("id"),
+                        rs.getInt("movieid"),
                         rs.getString("title"),
                         rs.getString("description"),
-                        rs.getString("url360"),
-                        rs.getString("url1080")
+                        rs.getString("file_sd"),
+                        rs.getString("file_hd"),
+                        rs.getString("status")
                 );
             }
         } catch (SQLException e) {
