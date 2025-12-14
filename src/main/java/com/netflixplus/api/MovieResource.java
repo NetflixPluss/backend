@@ -125,13 +125,52 @@ public class MovieResource {
         }
     }
 
-    private void executeHLSCommand(String input, String outputM3U8, int width, int height) throws IOException, InterruptedException {
+    private void executeHLSCommand(String input, String outputM3U8, int width, int height)
+            throws IOException, InterruptedException {
+
         File outputDir = new File(outputM3U8).getParentFile();
-        String cmd = String.format(
-                "ffmpeg -i %s -vf scale=%d:%d -c:a aac -c:v h264 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls %s",
-                input, width, height, outputM3U8
-        );
-        Process process = Runtime.getRuntime().exec(cmd);
-        process.waitFor();
+
+        System.out.println("==== HLS DEBUG ====");
+        System.out.println("Input file: " + input);
+        System.out.println("Output playlist: " + outputM3U8);
+        System.out.println("Output dir exists: " + outputDir.exists());
+        System.out.println("Output dir writable: " + outputDir.canWrite());
+        System.out.println("Running as user: " + System.getProperty("user.name"));
+
+        String[] cmd = {
+                "ffmpeg",
+                "-y",
+                "-i", input,
+                "-vf", "scale=" + width + ":" + height,
+                "-c:a", "aac",
+                "-c:v", "h264",
+                "-start_number", "0",
+                "-hls_time", "10",
+                "-hls_list_size", "0",
+                "-f", "hls",
+                outputM3U8
+        };
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        try (var reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(process.getInputStream()))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("[FFMPEG] " + line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        System.out.println("FFmpeg exited with code: " + exitCode);
+
+        if (exitCode != 0) {
+            throw new RuntimeException("FFmpeg failed with exit code " + exitCode);
+        }
     }
+
 }
