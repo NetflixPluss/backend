@@ -84,7 +84,7 @@ public class App {
             stmt.executeUpdate(usersSql);
 
             String moviesSql = "CREATE TABLE IF NOT EXISTS movies (" +
-                    "movieid TEXT PRIMARY KEY, " +
+                    "movieid VARCHAR(36) PRIMARY KEY, " +
                     "title TEXT, " +
                     "description TEXT, " +
                     "status TEXT, " +
@@ -101,6 +101,4 @@ public class App {
             e.printStackTrace();
         }
     }
-
-
 }
