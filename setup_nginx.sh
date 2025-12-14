@@ -26,17 +26,19 @@ else
   echo "Maven found."
 fi
 
-HLSHD=/var/www/netflixplus/hls/1080p
-HLSSD=/var/www/netflixplus/hls/360p
+HLS_HD=/var/www/netflixplus/1080p/hls
+HLS_SD=/var/www/netflixplus/360p/hls
+MP4_HD=/var/www/netflixplus/1080p/mp4
+MP4_SD=/var/www/netflixplus/360p/mp4
 
-for dir in "$HLSHD" "$HLSSD"; do
+for dir in "$HLS_HD" "$HLS_SD" "$MP4_HD" "$MP4_SD"; do
   if ! [ -d "$dir" ]; then
-    echo "Creating HLS directory $dir..."
+    echo "Creating directory $dir..."
     sudo mkdir -p "$dir"
     sudo chown -R "$USER":"$USER" "$dir"
     sudo chmod 755 "$dir"
   else
-    echo "HLS directory $dir already exists."
+    echo "Directory $dir already exists."
   fi
 done
 
