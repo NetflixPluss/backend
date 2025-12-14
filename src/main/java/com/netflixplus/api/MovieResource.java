@@ -186,6 +186,8 @@ public class MovieResource {
 
             String movieId = request.getToDeleteIdentifier();
 
+            System.out.println("Checking if movie exists: " + movieId);
+
             PreparedStatement check = con.prepareStatement("SELECT * FROM movies WHERE movieid = ?");
             check.setString(1, movieId);
             ResultSet rsCheck = check.executeQuery();
@@ -194,8 +196,6 @@ public class MovieResource {
                         .entity("{\"message\":\"Movie does not exist\"}")
                         .build();
             }
-
-            System.out.println("Checking if movie exists: " + movieId);
 
             PreparedStatement delete = con.prepareStatement(
                     "DELETE FROM movies WHERE movieid = ?"
