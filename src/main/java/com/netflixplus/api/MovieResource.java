@@ -74,7 +74,7 @@ public class MovieResource {
             AuthenticationResource.requireAdminOrMaster(
                     con,
                     username,
-                    password
+                    User.hashPassword(password)
             );
         } catch (SQLException e) {
             e.printStackTrace();
