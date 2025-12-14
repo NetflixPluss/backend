@@ -62,11 +62,24 @@ public class MovieResource {
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadMovie(
+            @FormDataParam("username") String username,
+            @FormDataParam("password") String password,
             @FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail,
             @FormDataParam("title") String title,
             @FormDataParam("description") String description
     ) {
+
+        try (Connection con = DB.openConnection()) {
+            AuthenticationResource.requireAdminOrMaster(
+                    con,
+                    username,
+                    password
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         String movieId = UUID.randomUUID().toString();
         File tempFile = new File("/tmp/" + movieId + "_" + fileDetail.getFileName());
 
