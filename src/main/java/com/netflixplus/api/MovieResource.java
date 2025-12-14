@@ -195,6 +195,8 @@ public class MovieResource {
                         .build();
             }
 
+            System.out.println("Checking if movie exists: " + movieId);
+
             PreparedStatement delete = con.prepareStatement(
                     "DELETE FROM movies WHERE movieid = ?"
             );
