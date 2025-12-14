@@ -65,7 +65,3 @@ mvn clean package || { echo "Maven build failed"; exit 1; }
 
 echo "Moving backend JAR to build/ directory..."
 mv target/netflixplusbackend.jar build/netflixplusbackend.jar
-
-echo "Starting backend..."
-nohup java -jar build/netflixplusbackend.jar > build/backend.log 2>&1 &
-echo "Backend started successfully!"
