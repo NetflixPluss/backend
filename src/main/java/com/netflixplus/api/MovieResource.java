@@ -51,31 +51,6 @@ public class MovieResource {
         return movies;
     }
 
-    @GET
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Movie getMovieById(@PathParam("id") String id) {
-        try (Connection con = DB.openConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM movies WHERE movied = ?")) {
-
-            ps.setString(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Movie(
-                        rs.getString("movieid"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getString("file_sd"),
-                        rs.getString("file_hd"),
-                        rs.getString("status")
-                );
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private static final String STORAGE_HD = "/var/www/netflixplus/hls/1080p/";
     private static final String STORAGE_SD = "/var/www/netflixplus/hls/360p/";
     private static final ExecutorService uploadExecutor = Executors.newFixedThreadPool(4);
