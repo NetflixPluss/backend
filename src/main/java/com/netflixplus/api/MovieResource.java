@@ -61,7 +61,7 @@ public class MovieResource {
 
     private static final String STORAGE_HD = "/var/www/netflixplus/1080p/";
     private static final String STORAGE_SD = "/var/www/netflixplus/360p/";
-    private static final ExecutorService uploadExecutor = Executors.newFixedThreadPool(4);
+    private static final ExecutorService uploadExecutor = Executors.newFixedThreadPool(8);
 
     @POST
     @Path("/upload")
@@ -116,34 +116,38 @@ public class MovieResource {
     }
 
     private void processVideo(String movieId, File inputFile) {
-        File hdDir = new File(STORAGE_HD+"/hls/", movieId);
-        File sdDir = new File(STORAGE_SD+"/hls/", movieId);
+        File hdHlsDir = new File(STORAGE_HD + "/hls/" + movieId);
+        File sdHlsDir = new File(STORAGE_SD + "/hls/" + movieId);
+        hdHlsDir.mkdirs();
+        sdHlsDir.mkdirs();
 
-        hdDir.mkdirs();
-        sdDir.mkdirs();
+        File hdMp4Dir = new File(STORAGE_HD + "/mp4/" + movieId);
+        File sdMp4Dir = new File(STORAGE_SD + "/mp4/" + movieId);
+        hdMp4Dir.mkdirs();
+        sdMp4Dir.mkdirs();
 
-        String hdMp4 = new File(STORAGE_HD+"/mp4/", movieId).getAbsolutePath();
-        String sdMp4 = new File(STORAGE_SD+"/mp4/", movieId).getAbsolutePath();
+        String hdMp4Path = new File(hdMp4Dir, "video.mp4").getAbsolutePath();
+        String sdMp4Path = new File(sdMp4Dir, "video.mp4").getAbsolutePath();
 
-        String hdM3u8 = new File(hdDir, "playlist.m3u8").getAbsolutePath();
-        String sdM3u8 = new File(sdDir, "playlist.m3u8").getAbsolutePath();
+        String hdM3u8 = new File(hdHlsDir, "playlist.m3u8").getAbsolutePath();
+        String sdM3u8 = new File(sdHlsDir, "playlist.m3u8").getAbsolutePath();
 
         try {
             System.out.println("Processing video: " + movieId);
 
-            executeHLS(inputFile.getAbsolutePath(), hdM3u8, 1920, 1080, movieId+"HLS_HD");
-            executeHLS(inputFile.getAbsolutePath(), sdM3u8, 640, 360, movieId+"HLS_SD");
+            executeHLS(inputFile.getAbsolutePath(), hdM3u8, 1920, 1080, movieId + "_HLS_HD");
+            executeHLS(inputFile.getAbsolutePath(), sdM3u8, 640, 360, movieId + "_HLS_SD");
 
-            executeMP4(inputFile.getAbsolutePath(), hdMp4, 1920, 1080, movieId+"MP4_HD");
-            executeMP4(inputFile.getAbsolutePath(), sdMp4, 640, 360, movieId+"MP4_HD");
+            executeMP4(inputFile.getAbsolutePath(), hdMp4Path, 1920, 1080, movieId + "_MP4_HD");
+            executeMP4(inputFile.getAbsolutePath(), sdMp4Path, 640, 360, movieId + "_MP4_SD");
 
             try (Connection con = DB.openConnection();
                  PreparedStatement ps = con.prepareStatement(
                          "UPDATE movies SET path_hls_hd=?, path_hls_sd=?, path_mp4_hd=?, path_mp4_sd=?, status=? WHERE movieid=?")) {
                 ps.setString(1, "/movies/1080p/hls/" + movieId + "/playlist.m3u8");
                 ps.setString(2, "/movies/360p/hls/" + movieId + "/playlist.m3u8");
-                ps.setString(3, "/movies/1080p/mp4/" + movieId);
-                ps.setString(4, "/movies/360p/mp4/" + movieId);
+                ps.setString(3, "/movies/1080p/mp4/" + movieId + "/video.mp4");
+                ps.setString(4, "/movies/360p/mp4/" + movieId + "/video.mp4");
                 ps.setString(5, "READY");
                 ps.setString(6, movieId);
                 ps.executeUpdate();
@@ -188,14 +192,8 @@ public class MovieResource {
         if (exit != 0) throw new RuntimeException("FFmpeg MP4 failed for " + processId);
     }
 
-    private void executeHLS(
-            String input,
-            String output,
-            int width,
-            int height,
-            String processId
-    ) throws Exception {
 
+    private void executeHLS(String input, String output, int width, int height, String processId) throws Exception {
         String[] cmd = {
                 "ffmpeg",
                 "-y",
@@ -224,7 +222,7 @@ public class MovieResource {
         }
 
         int exit = process.waitFor();
-        if (exit != 0) throw new RuntimeException("FFmpeg failed for movie " + processId);
+        if (exit != 0) throw new RuntimeException("FFmpeg HLS failed for " + processId);
     }
 
     @POST
